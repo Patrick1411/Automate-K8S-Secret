@@ -43,6 +43,10 @@ jobs:
               # Split each line into key and value pair by '=' sign
               key="${appenv%%=*}"
               value="${appenv#*=}"
+
+              key=$(echo "$key" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+              value=$(echo "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
           
               # Encode the value as base64
               encoded_value=$(echo -n "$value" | base64)
