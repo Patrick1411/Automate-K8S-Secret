@@ -1,0 +1,63 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-k8s-secret:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Create kubeconfig
+        env:
+          APP_ENV_STAGING: ${{ secrets.APP_ENV }}
+          SECRET_NAME: test-k8s-secret
+          NAMESPACE: exro-iot-staging
+        run: |
+          echo "[bnk-exro-uat]
+          aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
+          echo ${{ secrets.KUBE_CONFIG_STAGING }} | base64 --decode > ${HOME}/.kube/config
+
+          if [ -z "$APP_ENV_STAGING" ]; then
+            echo -e "\e[33mNotes: You do not use the APP_ENV variable in this project since it's empty.\e[0m"
+          else
+          
+            while IFS= read -r appenv; do
+              # Skip empty lines
+              if [ -z "$appenv" ]; then
+                echo -e "\e[36mAn empty line was detected in the APP_ENV variable, ignore it and continue processing.....\e[0m"
+                continue
+              fi
+          
+              # Split each line into key and value pair by '=' sign
+              key="${appenv%%=*}"
+              value="${appenv#*=}"
+          
+              # Encode the value as base64
+              encoded_value=$(echo -n "$value" | base64)
+          
+              # Write key-value pairs to the Secret YAML file
+              echo "  $key: $encoded_value" >> secret.yaml
+            done <<< "$APP_ENV_STAGING"
+          
+            # Create the Secret
+            cat <<EOF > secret.yaml
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: $SECRET_NAME
+            namespace: $NAMESPACE
+          type: Opaque
+          data:
+          $(cat secret.yaml)
+          EOF
+          
+            kubectl apply -f secret.yaml
+          fi
