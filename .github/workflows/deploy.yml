@@ -20,9 +20,13 @@ jobs:
           SECRET_NAME: test-k8s-secret
           NAMESPACE: exro-iot-staging
         run: |
+          mkdir -p $HOME/.aws
+          touch $HOME/.aws/credentials
           echo "[bnk-exro-uat]
           aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $HOME/.aws/credentials
+          mkdir -p $HOME/.kube
+          touch $HOME/.kube/config
           echo ${{ secrets.KUBE_CONFIG_STAGING }} | base64 --decode > ${HOME}/.kube/config
 
           if [ -z "$APP_ENV_STAGING" ]; then
