@@ -50,7 +50,6 @@ jobs:
           
               # Encode the value as base64
               encoded_value=$(echo -n "$value" | base64 | tr -d '\n')
-              echo $encoded_value
           
               # Write key-value pairs to the Secret YAML file
               echo "  $key: $encoded_value" >> secret.yaml
@@ -68,6 +67,5 @@ jobs:
           $(cat secret.yaml)
           EOF
           
-            cat secret.yaml
             kubectl apply -f secret.yaml
           fi
