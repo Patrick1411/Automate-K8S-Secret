@@ -50,9 +50,10 @@ jobs:
           
               # Encode the value as base64
               encoded_value=$(echo -n "$value" | base64)
+              echo $encoded_value
           
               # Write key-value pairs to the Secret YAML file
-              echo "  $key: '$encoded_value'" >> secret.yaml
+              echo "  $key: $encoded_value" >> secret.yaml
             done <<< "$APP_ENV_STAGING"
           
             # Create the Secret
