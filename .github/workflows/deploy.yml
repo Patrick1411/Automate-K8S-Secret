@@ -67,6 +67,6 @@ jobs:
           $(cat secret.yaml)
           EOF
           
-            #kubectl apply -f secret.yaml
             cat secret.yaml
+            kubectl apply -f secret.yaml
           fi
