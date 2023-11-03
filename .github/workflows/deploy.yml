@@ -49,7 +49,7 @@ jobs:
 
           
               # Encode the value as base64
-              encoded_value=$(echo -n "$value" | base64)
+              encoded_value=$(echo -n "$value" | base64 | tr -d '\n')
               echo $encoded_value
           
               # Write key-value pairs to the Secret YAML file
